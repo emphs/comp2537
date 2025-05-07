@@ -47,7 +47,7 @@ app.use(session({
     cookie: {
         secure: false,
         httpOnly: true,
-        maxAge: 3600
+        maxAge: 3600000
     }
 }));
 
@@ -229,12 +229,19 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/members', async (req, res) => {
+
+    console.log(req.session.stat);
+
     if (!req.session.stat) {
         return res.status(403).redirect('/');
     }
 
+    const routes = ['/img/icon-mail.svg', '/img/icon_js.svg', '/img/icon_terraform.svg'];
+    const randomSrc = routes[Math.floor(Math.random() * routes.length)];
+
     res.send(`
         <h1>Hello, ${req.session.name}</h1>
+        <img src="${randomSrc}"/>
         <form action="/logout" method="get">
             <button type="submit">Sign Out</button>
         </form>
