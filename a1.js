@@ -195,7 +195,7 @@ app.get('/login', async (req, res) => {
     `);
 });
 
-app.get('/loginSubmit', async (req, res) => {
+app.post('/loginSubmit', async (req, res) => {
     let { email, password } = req.body;
 
     const { error, value } = loginSchema.validate(req.body);
