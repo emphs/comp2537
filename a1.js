@@ -125,7 +125,6 @@ app.get('/signup', async (req, res) => {
         </body>
         </html>
     `);
-
 });
 
 app.post('/signupSubmit', (req, res) => {
@@ -174,6 +173,29 @@ const loginSchema = Joi.object({
 });
 
 app.get('/login', async (req, res) => {
+    console.log(233)
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>a1</title>
+        </head>
+        <body>
+        <h1>login</h1>
+        <form action="/loginSubmit" method="POST">
+            <input type="email" placeholder="email" name="email"><br>
+            <input type="password" placeholder="password" name="password"><br>
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+        </body>
+        </html>
+    `);
+});
+
+app.get('/loginSubmit', async (req, res) => {
     let { email, password } = req.body;
 
     const { error, value } = loginSchema.validate(req.body);
@@ -186,8 +208,7 @@ app.get('/login', async (req, res) => {
         return res.status(401).send('Invalid credentials');
     }
 
-    let validPassword = await bcrypt.compare(value.password, user.password);
-    if (!validPassword) {
+    if (! await bcrypt.compare(value.password, user.password)) {
         return res.status(401).send('Invalid credentials');
     }
 
