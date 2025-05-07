@@ -4,32 +4,39 @@ const express = require("express");
 const session = require('express-session');
 const mysql = require('mysql2/promise');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const { JSDOM } = require('jsdom');
+const bcrypt = require('bcrypt');
+const Joi = require('joi');
 const app = express();
 app.use(express.json());
 const fs = require("fs");
 
 require('dotenv').config();
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "";
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
-async function run() {
-    try {
-        await client.connect();
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    } finally {
-        await client.close();
-    }
-}
-run().catch(console.dir);
+// const { MongoClient, ServerApiVersion } = require('mongodb');
+// const uri = "";
+// const client = new MongoClient(uri, {
+//     serverApi: {
+//         version: ServerApiVersion.v1,
+//         strict: true,
+//         deprecationErrors: true,
+//     }
+// });
+// async function run() {
+//     try {
+//         await client.connect();
+//         await client.db("admin").command({ ping: 1 });
+//         console.log("Pinged your deployment. You successfully connected to MongoDB!");
+//     } finally {
+//         await client.close();
+//     }
+// }
+// run().catch(console.dir);
+
+mongoose.connect(process.env.MONGO_URL)
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -40,7 +47,7 @@ app.use(session({
     cookie: {
         secure: false,
         httpOnly: true,
-        maxAge: 360000000
+        maxAge: 3600
     }
 }));
 
@@ -75,6 +82,26 @@ app.get('/', (req, res) => {
         </html>
     `);
 });
+
+let joiEval = Joi.object({
+    name: Joi.string().min(6).required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required()
+});
+const mSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true }
+});
+
+mSchema.pre('save', async function(next) {
+    if (this.isModified('password')) {
+        this.password = await bcrypt.hash(this.password, 10);
+    }
+    next();
+});
+
+const u_orm = mongoose.model('User', mSchema);
 
 app.get('/signup', async (req, res) => {
     console.log(233)
@@ -112,10 +139,16 @@ app.post('/signupSubmit', (req, res) => {
     console.log(password)
 
     if (name && email && password) {
+
+        let { error, value } = joiEval.validate(req.body);
+        if (error) {
+            return res.status(400).send(error.details[0].message + "<br><a href=\"/signup\">Try again</a>");
+        }
+
         req.session.stat = "valid";
         req.session.name = name;
-        req.session.email = email;
-        req.session.pwd = password;
+        const user = new u_orm(value);
+        user.save().then(r => console.log("ok", r));
         res.redirect('/members');
     } else {
         res.send(`
@@ -135,38 +168,37 @@ app.post('/signupSubmit', (req, res) => {
     }
 });
 
+const loginSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required()
+});
+
 app.get('/login', async (req, res) => {
-    const { username, password, ck } = req.body;
+    let { email, password } = req.body;
 
-    try {
-        const [users] = await pool.query(
-            'SELECT * FROM A01461078_user WHERE username = ?',
-            [username]
-        );
-
-        console.log(users)
-
-        if (users.length === 0 || password !== users[0].password) {
-            return res.status(401).json({
-                code: 401,
-                msg: 'Invalid username or password',
-                cookie: "None",
-            });
-        }
-
-        req.session.userId = users[0].id;
-        req.session.ck = ck;
-
-        console.log(req.session);
-
-        res.json({
-            code: 200,
-            msg: 'ok',
-            cookie: "cookie",
-        })
-
-    } catch (error) {
+    const { error, value } = loginSchema.validate(req.body);
+    if (error) {
+        return res.status(400).send(error.details[0].message);
     }
+
+    let user = await u_orm.findOne({ email: value.email });
+    if (!user) {
+        return res.status(401).send('Invalid credentials');
+    }
+
+    let validPassword = await bcrypt.compare(value.password, user.password);
+    if (!validPassword) {
+        return res.status(401).send('Invalid credentials');
+    }
+
+    console.log(user);
+
+    req.session.stat = "valid";
+    // req.session.name = user.name;
+    req.session.email = email;
+
+
+    res.redirect('/members');
 });
 
 app.get('/logout', (req, res) => {

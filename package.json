@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "node a5.js"
+    "dev": "node a1.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -9,7 +9,10 @@
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
+    "joi": "^17.13.3",
     "jsdom": "^26.0.0",
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.14.1",
     "mysql2": "^3.14.0"
   }
 }
