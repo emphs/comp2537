@@ -56,30 +56,41 @@ app.use("/css", express.static("./public/css"));
 app.use("/img", express.static("./public/img"));
 app.use("/html", express.static("./public/html"));
 
-app.set('view engine', 'ejs');
-app.set('views', 'ejs_views');
-
 app.get('/', (req, res) => {
 
     console.log(req.session);
-
-    res.render('index', {
-        title: "home", stat: req.session.stat, name: req.session.name,
-    });
-
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>a1</title>
+        </head>
+        <body>
+        ${ req.session.stat ?
+        `
+            <h1>Hello, ${req.session.name || "N/A"}</h1>
+            <button onclick="location.href='/members'" type="button">Go to Members Area</button><br>
+            <button onclick="location.href='/logout'" type="button">Logout</button>`
+        :
+        `
+            <button onclick="location.href='/signup'" type="button">Sign up</button><br>
+            <button onclick="location.href='/login'" type="button">Log in</button>`
+    }
+        </body>
+        </html>
+    `);
 });
 
 let joiEval = Joi.object({
     name: Joi.string().min(6).required(),
     email: Joi.string().email().required(),
-    password: Joi.string().min(6).required(),
+    password: Joi.string().min(6).required()
 });
-
 const mSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    session_from: { type: Number, default: 0 },
-    user_type: { type: String, enum: ['user', 'admin'], default: 'user' },
     password: { type: String, required: true }
 });
 
@@ -93,9 +104,27 @@ mSchema.pre('save', async function(next) {
 const u_orm = mongoose.model('User', mSchema);
 
 app.get('/signup', async (req, res) => {
-    res.render('signup', {
-        title: "signup",
-    });
+    console.log(233)
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>a1</title>
+        </head>
+        <body>
+        <h1>create user</h1>
+        <form action="/signupSubmit" method="POST">
+            <input type="text" placeholder="name" name="name"><br>
+            <input type="email" placeholder="email" name="email"><br>
+            <input type="password" placeholder="password" name="password"><br>
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+        </body>
+        </html>
+    `);
 });
 
 app.post('/signupSubmit', (req, res) => {
@@ -117,15 +146,24 @@ app.post('/signupSubmit', (req, res) => {
 
         req.session.stat = "valid";
         req.session.name = name;
-        req.session.type = "user";
-        value.session_from = Date.now();
         const user = new u_orm(value);
         user.save().then(r => console.log("ok", r));
         res.redirect('/members');
     } else {
-        res.render('signupSubmit', {
-            title: "signupSubmit", errors: errors,
-        });
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>a1</title>
+            </head>
+            <body>
+            ${errors}
+            <a href="/signup">Try again</a>
+            </body>
+            </html>
+        `);
     }
 });
 
@@ -135,10 +173,26 @@ const loginSchema = Joi.object({
 });
 
 app.get('/login', async (req, res) => {
-
-    res.render('login', {
-        title: "login",
-    });
+    console.log(233)
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>a1</title>
+        </head>
+        <body>
+        <h1>login</h1>
+        <form action="/loginSubmit" method="POST">
+            <input type="email" placeholder="email" name="email"><br>
+            <input type="password" placeholder="password" name="password"><br>
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+        </body>
+        </html>
+    `);
 });
 
 app.post('/loginSubmit', async (req, res) => {
@@ -146,31 +200,23 @@ app.post('/loginSubmit', async (req, res) => {
 
     const { error, value } = loginSchema.validate(req.body);
     if (error) {
-        return res.status(400).render('loginSubmit', {
-            title: "loginSubmit", errors: error.details[0].message,
-        });
+        return res.status(400).send(error.details[0].message);
     }
 
     let user = await u_orm.findOne({ email: value.email });
-
     if (!user) {
-        return res.status(401).render('loginSubmit', {
-            title: "loginSubmit", errors: "Invalid credentials",
-        });
+        return res.status(401).send('Invalid credentials');
     }
 
     if (! await bcrypt.compare(value.password, user.password)) {
-        return res.status(401).render('loginSubmit', {
-            title: "loginSubmit", errors: "Invalid credentials",
-        });
+        return res.status(401).send('Invalid credentials');
     }
 
     console.log(user);
 
     req.session.stat = "valid";
-    req.session.name = user.name;
+    // req.session.name = user.name;
     req.session.email = email;
-    req.session.type = user.user_type;
 
 
     res.redirect('/members');
@@ -191,56 +237,19 @@ app.get('/members', async (req, res) => {
     }
 
     const routes = ['/img/icon-mail.svg', '/img/icon_js.svg', '/img/icon_terraform.svg'];
+    const randomSrc = routes[Math.floor(Math.random() * routes.length)];
 
-    res.render('members', {
-        title: "member",
-        routes: routes,
-    });
-});
-
-
-app.get('/admin', async (req, res) => {
-
-    if (!req.session.stat) {
-        return res.status(403).redirect('/login');
-    }
-
-    if (req.session.type !== "admin") {
-        return res.status(403).render('adminError', {
-            title: "adminError",
-        });
-    }
-
-    const users = await u_orm.find();
-    res.render('admin', {
-        title: "admin",
-        users
-    });
-
-
-});
-
-app.post('/admin/update', async (req, res) => {
-    const { userId, action } = req.body;
-    try {
-        const user = await u_orm.findById(userId);
-        if (user) {
-            user.user_type = action === 'promote' ? 'admin' : 'user';
-            await user.save();
-            res.redirect('/admin');
-        } else {
-            res.redirect('/admin');
-        }
-    } catch (error) {
-        console.error(error);
-        res.redirect('/admin');
-    }
+    res.send(`
+        <h1>Hello, ${req.session.name}</h1>
+        <img src="${randomSrc}"/>
+        <form action="/logout" method="get">
+            <button type="submit">Sign Out</button>
+        </form>
+    `);
 });
 
 app.use(function (req, res, next) {
-    res.status(404).render('404', {
-        title: "404",
-    });
+    res.status(404).send("<html><head><title>404</title></head><body><p>Page not found!</p></body></html>");
 });
 
 let port = process.env.PORT || 8000;;

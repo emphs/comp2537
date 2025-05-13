@@ -1,0 +1,17 @@
+
+<%- include('templates/header') %>
+
+<div class="container mb-4">
+    <h1>Images !</h1><div class="row">
+        <% routes.forEach(function(src) { %>
+            <div class="col-12 col-sm-6 col-md-4 mb-3">
+                <img src="<%= src %>" class="img-fluid rounded" alt="Icon" />
+            </div>
+        <% }); %>
+    </div>
+    <form action="/logout" method="get">
+        <button type="submit">Sign Out</button>
+    </form>
+</div>
+
+<%- include('templates/footer') %>

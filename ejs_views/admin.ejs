@@ -1,0 +1,34 @@
+
+<%- include('templates/header') %>
+
+<div class="container mb-4">
+    <h1>users</h1>
+    <table>
+    <tbody>
+    <% users.forEach(user => { %>
+        <tr>
+            <td><%= user.name %></td>
+            <td><%= user.email %></td>
+            <td><%= user.user_type %></td>
+            <td>
+                <% if (user.user_type === 'user') { %>
+                    <form action="/admin/update" method="POST" style="display:inline;">
+                        <input type="hidden" name="userId" value="<%= user._id %>">
+                        <input type="hidden" name="action" value="promote">
+                        <button type="submit">Promote</button>
+                    </form>
+                <% } else { %>
+                    <form action="/admin/update" method="POST" style="display:inline;">
+                        <input type="hidden" name="userId" value="<%= user._id %>">
+                        <input type="hidden" name="action" value="demote">
+                        <button type="submit">Demote</button>
+                    </form>
+                <% } %>
+            </td>
+        </tr>
+    <% }) %>
+    </tbody>
+    </table>
+</div>
+
+<%- include('templates/footer') %>

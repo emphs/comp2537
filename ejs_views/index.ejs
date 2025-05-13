@@ -1,0 +1,15 @@
+
+<%- include('templates/header') %>
+
+<div class="container mb-4">
+    <% if (stat) { %>
+        <h1>Hello, <%= name || "N/A" %></h1>
+        <button onclick="location.href='/members'" type="button">Go to Members Area</button><br>
+        <button onclick="location.href='/logout'" type="button">Logout</button>
+    <% } else { %>
+        <button onclick="location.href='/signup'" type="button">Sign up</button><br>
+        <button onclick="location.href='/login'" type="button">Log in</button>
+    <% } %>
+</div>
+
+<%- include('templates/footer') %>

@@ -1,0 +1,18 @@
+
+<%- include('templates/header') %>
+
+<div class="container mb-4">
+    <form class="p-4 border rounded" style="min-width: 300px;" method="POST" action="/loginSubmit">
+        <h2 class="mb-4 text-center">Sign In</h2>
+        <div class="mb-3">
+            <input type="email" name="email" placeholder="email"/>
+        </div>
+        <div class="mb-3">
+            <input type="password" name="password" placeholder="Password"/>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Sign In</button>
+    </form>
+</div>
+
+<%- include('templates/footer') %>
