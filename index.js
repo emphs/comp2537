@@ -2,9 +2,9 @@
 function setup () {
 
   const DIFFICULTY_SETTINGS = {
-    easy: { pairs: 6, time: 90 },
-    medium: { pairs: 10, time: 120 },
-    hard: { pairs: 15, time: 180 },
+    easy: { pairs: 6, time: 30 },
+    medium: { pairs: 10, time: 90 },
+    hard: { pairs: 15, time: 60 },
   };
 
   const body = document.body;
