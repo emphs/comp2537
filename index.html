@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Match Game</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- import jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="index.js"></script>
+</head>
+<body class="light">
+
+<h1>Match Game</h1>
+
+<div class="controls">
+  <label>
+    Difficulty:
+    <select id="difficulty-select">
+      <option value="easy">Easy (6 pairs, 90s)</option>
+      <option value="medium">Medium (10 pairs, 120s)</option>
+      <option value="hard">Hard (15 pairs, 180s)</option>
+    </select>
+  </label>
+
+  <label>
+    Theme:
+    <select id="theme-select">
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+  </label>
+
+  <button id="start-btn">Start</button>
+  <button id="restart-btn">Restart</button>
+  <button id="powerup-btn" title="Reveal all cards for 5 seconds (Cooldown 30s)" disabled>Power-Up</button>
+</div>
+
+<div class="status" id="status-header">
+  Please start the game.
+</div>
+
+<div id="game-board"></div>
+
+<div class="message" id="game-message"></div>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+:root {
+  --light-bg: #f0f0f0;
+  --light-card-back: #ccc;
+  --light-text: #222;
+
+  --dark-bg: #222;
+  --dark-card-back: #444;
+  --dark-text: #eee;
+
+  --card-width: 110px;
+  --card-height: 150px;
+}
+
+body.light {
+  background-color: var(--light-bg);
+  color: var(--light-text);
+}
+
+body.dark {
+  background-color: var(--dark-bg);
+  color: var(--dark-text);
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+h1 {
+  text-align: center;
+}
+
+.controls {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+select, button {
+  margin: 0 10px;
+  padding: 5px 10px;
+  font-size: 1rem;
+}
+
+.status {
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+#game-board {
+  display: grid;
+  justify-content: center;
+  gap: 10px;
+}
+
+.card {
+  width: var(--card-width);
+  height: var(--card-height);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  position: relative;
+  transition: background-color 0.3s;
+}
+
+body.light .card {
+  background-color: var(--light-card-back);
+}
+
+body.dark .card {
+  background-color: var(--dark-card-back);
+}
+
+.card.flipped, .card.matched {
+  background-color: white;
+}
+
+.card img {
+  max-width: 90%;
+  max-height: 90%;
+  pointer-events: none;
+}
+
+.card .question-mark {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.message {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
